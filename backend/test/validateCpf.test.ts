@@ -1,3 +1,4 @@
+import { expect, test } from "@jest/globals";
 import { validateCpf } from "../src/validateCpf";
 
 test.each(["97456321558", "71428793860", "87748248800"])(
