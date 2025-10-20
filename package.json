@@ -1,0 +1,13 @@
+{
+  "name": "ccca",
+  "version": "1.0.0",
+  "main": "",
+  "scripts": {
+    "compose:up": "docker compose -f docker/docker-compose.yaml up -d",
+    "compose:down": "docker compose -f docker/docker-compose.yaml down -v"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
