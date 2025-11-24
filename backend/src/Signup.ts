@@ -2,10 +2,10 @@ import crypto from "node:crypto";
 import { validateCpf } from "./validateCpf";
 import AccountDAO from "./AccountDAO";
 
-export default class AccountService {
+export default class Signup {
   constructor(readonly accountDAO: AccountDAO) {}
 
-  async signup(account: any) {
+  async execute(account: Input): Promise<Output> {
     const accountId = crypto.randomUUID();
 
     if (!account.name || !account.name.match(/[a-zA-Z]+ [a-zA-Z]/)) {
@@ -30,32 +30,27 @@ export default class AccountService {
       throw new Error("Invalid password");
     }
 
-    try {
-      await this.accountDAO.saveAccount({
-        accountId,
-        name: account.name,
-        email: account.email,
-        document: account.document,
-        password: account.password,
-      });
+    await this.accountDAO.saveAccount({
+      accountId,
+      name: account.name,
+      email: account.email,
+      document: account.document,
+      password: account.password,
+    });
 
-      return {
-        accountId,
-      };
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
-
-  async getAccount(accountId: string) {
-    try {
-      const account = await this.accountDAO.getAccountById(accountId);
-
-      return account;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    return {
+      accountId,
+    };
   }
 }
+
+type Input = {
+  name: string;
+  email: string;
+  document: string;
+  password: string;
+};
+
+type Output = {
+  accountId: string;
+};
