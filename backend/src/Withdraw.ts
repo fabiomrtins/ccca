@@ -1,41 +1,20 @@
-import AccountDAO from "./AccountDAO";
-import AccountAssetDAO from "./AccountAssetDAO";
+import AccountRepository from "./AccountRepository";
 
 export default class Withdraw {
-  constructor(
-    readonly accountDAO: AccountDAO,
-    readonly accountAssetDAO: AccountAssetDAO
-  ) {}
+  constructor(readonly accountRepository: AccountRepository) {}
 
   async execute(input: Input): Promise<void> {
-    if (input.quantity <= 0) {
-      throw new Error("Quantity must be positive");
-    }
-
-    const account = await this.accountDAO.getAccountById(input.accountId);
+    const account = await this.accountRepository.getAccountById(
+      input.accountId
+    );
 
     if (!account) {
       throw new Error("Account not found");
     }
 
-    const accountAsset =
-      await this.accountAssetDAO.getAccountAssetsByAccountIdAndAssetId(
-        input.accountId,
-        input.assetId
-      );
+    account.withdraw(input.assetId, input.quantity);
 
-    if (!accountAsset) {
-      throw new Error("Asset not found");
-    }
-
-    if (accountAsset.quantity - input.quantity < 0) {
-      throw new Error("Insufficient funds");
-    }
-    const updateAccountAsset = input;
-
-    updateAccountAsset.quantity =
-      parseFloat(accountAsset.quantity) - input.quantity;
-    await this.accountAssetDAO.updateAccountAsset(updateAccountAsset);
+    await this.accountRepository.updateAccount(account);
   }
 }
 

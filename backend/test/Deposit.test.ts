@@ -1,10 +1,9 @@
 import { beforeEach, expect, test } from "@jest/globals";
 import axios from "axios";
-import { AccountDAODatabase } from "../src/AccountDAO";
 import Signup from "../src/Signup";
 import GetAccount from "../src/GetAccount";
 import Deposit from "../src/Deposit";
-import { AccountAssetDAODatabase } from "../src/AccountAssetDAO";
+import { AccountRepositoryDatabase } from "../src/AccountRepository";
 
 let input: any = null;
 let signup: Signup;
@@ -13,11 +12,10 @@ let getAccount: GetAccount;
 axios.defaults.validateStatus = () => true;
 
 beforeEach(() => {
-  const accountDAO = new AccountDAODatabase();
-  const accountAssetDAO = new AccountAssetDAODatabase();
-  signup = new Signup(accountDAO);
-  getAccount = new GetAccount(accountDAO, accountAssetDAO);
-  deposit = new Deposit(accountDAO, accountAssetDAO);
+  const accountDatabaseRepository = new AccountRepositoryDatabase();
+  signup = new Signup(accountDatabaseRepository);
+  getAccount = new GetAccount(accountDatabaseRepository);
+  deposit = new Deposit(accountDatabaseRepository);
 
   input = {
     name: "Alice Ferreira",

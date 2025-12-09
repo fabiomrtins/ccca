@@ -1,26 +1,24 @@
 import { beforeEach, expect, test } from "@jest/globals";
 import axios from "axios";
-import { AccountDAODatabase } from "../src/AccountDAO";
 import Signup from "../src/Signup";
 import GetAccount from "../src/GetAccount";
 import Deposit from "../src/Deposit";
-import { AccountAssetDAODatabase } from "../src/AccountAssetDAO";
 import Withdraw from "../src/Withdraw";
+import { AccountRepositoryDatabase } from "../src/AccountRepository";
 
 let input: any = null;
 let signup: Signup;
 let deposit: Deposit;
-let withdraw: Deposit;
+let withdraw: Withdraw;
 let getAccount: GetAccount;
 axios.defaults.validateStatus = () => true;
 
 beforeEach(() => {
-  const accountDAO = new AccountDAODatabase();
-  const accountAssetDAO = new AccountAssetDAODatabase();
-  signup = new Signup(accountDAO);
-  getAccount = new GetAccount(accountDAO, accountAssetDAO);
-  deposit = new Deposit(accountDAO, accountAssetDAO);
-  withdraw = new Withdraw(accountDAO, accountAssetDAO);
+  const accountRepositoryDatabase = new AccountRepositoryDatabase();
+  signup = new Signup(accountRepositoryDatabase);
+  getAccount = new GetAccount(accountRepositoryDatabase);
+  deposit = new Deposit(accountRepositoryDatabase);
+  withdraw = new Withdraw(accountRepositoryDatabase);
 
   input = {
     name: "Alice Ferreira",

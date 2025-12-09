@@ -1,45 +1,21 @@
-import crypto from "node:crypto";
-import { validateCpf } from "./validateCpf";
-import AccountDAO from "./AccountDAO";
+import Account from "./Account";
+import AccountRepository from "./AccountRepository";
 
 export default class Signup {
-  constructor(readonly accountDAO: AccountDAO) {}
+  constructor(readonly accountRepository: AccountRepository) {}
 
-  async execute(account: Input): Promise<Output> {
-    const accountId = crypto.randomUUID();
+  async execute(input: Input): Promise<Output> {
+    const account = Account.create(
+      input.name,
+      input.email,
+      input.document,
+      input.password
+    );
 
-    if (!account.name || !account.name.match(/[a-zA-Z]+ [a-zA-Z]/)) {
-      throw new Error("Invalid name");
-    }
-
-    if (!account.email || !account.email.match(/.+@.+\..+/)) {
-      throw new Error("Invalid e-mail");
-    }
-
-    if (!account.document || !validateCpf(account.document)) {
-      throw new Error("Invalid document");
-    }
-
-    if (
-      !account.password ||
-      account.password.length < 8 ||
-      !account.password.match(/[a-z]/) ||
-      !account.password.match(/[A-Z]/) ||
-      !account.password.match(/[0-9]/)
-    ) {
-      throw new Error("Invalid password");
-    }
-
-    await this.accountDAO.saveAccount({
-      accountId,
-      name: account.name,
-      email: account.email,
-      document: account.document,
-      password: account.password,
-    });
+    await this.accountRepository.saveAccount(account);
 
     return {
-      accountId,
+      accountId: account.accountId,
     };
   }
 }

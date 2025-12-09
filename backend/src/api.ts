@@ -1,19 +1,17 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { AccountDAODatabase } from "./AccountDAO";
 import Signup from "./Signup";
 import GetAccount from "./GetAccount";
-import { AccountAssetDAODatabase } from "./AccountAssetDAO";
+import { AccountRepositoryDatabase } from "./AccountRepository";
 
 async function main() {
   const app = express();
   app.use(express.json());
   app.use(cors());
 
-  const accountDAO = new AccountDAODatabase();
-  const accountAssetDAO = new AccountAssetDAODatabase();
-  const signup = new Signup(accountDAO);
-  const getAccount = new GetAccount(accountDAO, accountAssetDAO);
+  const accountRepositoryDatabase = new AccountRepositoryDatabase()
+  const signup = new Signup(accountRepositoryDatabase);
+  const getAccount = new GetAccount(accountRepositoryDatabase);
 
   app.post("/signup", async (req: Request, res) => {
     const input = req.body;
@@ -46,7 +44,7 @@ async function main() {
     }
   });
 
-  app.listen(5000);
+  app.listen(5000); 
 }
 
 main();
