@@ -5,20 +5,28 @@ import GetAccount from "../src/GetAccount";
 import Deposit from "../src/Deposit";
 import Withdraw from "../src/Withdraw";
 import { AccountRepositoryDatabase } from "../src/AccountRepository";
+import DatabaseConnection, { PgPromiseAdapter } from "../src/DatabaseConnection";
+import 'dotenv/config'
 
 let input: any = null;
 let signup: Signup;
 let deposit: Deposit;
 let withdraw: Withdraw;
 let getAccount: GetAccount;
+let connection: DatabaseConnection;
+
 axios.defaults.validateStatus = () => true;
 
-beforeEach(() => {
-  const accountRepositoryDatabase = new AccountRepositoryDatabase();
+beforeAll(() => {
+  connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
+  const accountRepositoryDatabase = new AccountRepositoryDatabase(connection);
   signup = new Signup(accountRepositoryDatabase);
   getAccount = new GetAccount(accountRepositoryDatabase);
   deposit = new Deposit(accountRepositoryDatabase);
   withdraw = new Withdraw(accountRepositoryDatabase);
+})
+
+beforeEach(() => {
 
   input = {
     name: "Alice Ferreira",
@@ -89,4 +97,8 @@ test("Should not withdraw asset from account that does not have enough funds", a
   await expect(() => withdraw.execute(inputWithdraw)).rejects.toThrow(
     new Error("Insufficient funds")
   );
+});
+
+afterAll(async () => {
+  await connection.close();
 });

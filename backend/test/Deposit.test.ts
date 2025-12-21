@@ -4,19 +4,25 @@ import Signup from "../src/Signup";
 import GetAccount from "../src/GetAccount";
 import Deposit from "../src/Deposit";
 import { AccountRepositoryDatabase } from "../src/AccountRepository";
+import DatabaseConnection, { PgPromiseAdapter } from "../src/DatabaseConnection";
+import 'dotenv/config'
 
 let input: any = null;
 let signup: Signup;
 let deposit: Deposit;
 let getAccount: GetAccount;
+let connection: DatabaseConnection;
 axios.defaults.validateStatus = () => true;
 
-beforeEach(() => {
-  const accountDatabaseRepository = new AccountRepositoryDatabase();
+beforeAll(() => {
+  connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
+  const accountDatabaseRepository = new AccountRepositoryDatabase(connection);
   signup = new Signup(accountDatabaseRepository);
   getAccount = new GetAccount(accountDatabaseRepository);
   deposit = new Deposit(accountDatabaseRepository);
+})
 
+beforeEach(() => {
   input = {
     name: "Alice Ferreira",
     email: "alice.ferreira@example.com",
@@ -75,3 +81,7 @@ test("Should not make a deposit with invalid quantity", async () => {
     new Error("Quantity must be positive")
   );
 });
+
+afterAll(async () => {
+  await connection.close()
+})

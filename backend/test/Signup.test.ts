@@ -4,23 +4,33 @@ import sinon from "sinon";
 import Signup from "../src/Signup";
 import GetAccount from "../src/GetAccount";
 import { AccountRepositoryDatabase } from "../src/AccountRepository";
+import DatabaseConnection, {
+  PgPromiseAdapter,
+} from "../src/DatabaseConnection";
+import 'dotenv/config'
 
 let input: any = null;
 let signup: Signup;
 let getAccount: GetAccount;
+let connection: DatabaseConnection;
+
 axios.defaults.validateStatus = () => true;
 
-beforeEach(() => {
-  const accountRepository = new AccountRepositoryDatabase();
+beforeAll(() => {
+  
+  connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
+  const accountRepository = new AccountRepositoryDatabase(connection);
   signup = new Signup(accountRepository);
   getAccount = new GetAccount(accountRepository);
+});
 
+beforeEach(() => {
   input = {
     name: "Alice Ferreira",
     email: "alice.ferreira@example.com",
     document: "97456321558",
     password: "aWERFA120",
-    assets: []
+    assets: [],
   };
 });
 
@@ -93,4 +103,8 @@ test("Should get data from existing account using mock", async () => {
 
   mock.verify();
   mock.restore();
+});
+
+afterAll(async () => {
+  await connection.close();
 });
