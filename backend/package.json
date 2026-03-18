@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hapi/hapi": "^21.4.7",
     "@types/cors": "^2.8.19",
     "@types/sinon": "^17.0.4",
     "axios": "^1.12.2",
@@ -15,11 +16,14 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "pg-promise": "^12.2.0",
+    "restify": "^11.1.0",
     "sinon": "^21.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/hapi__hapi": "^20.0.13",
     "@types/jest": "^30.0.0",
+    "@types/restify": "^8.5.12",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "serve": "^14.2.5",
