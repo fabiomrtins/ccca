@@ -1,12 +1,13 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import Signup from "./Signup";
-import GetAccount from "./GetAccount";
-import { AccountRepositoryDatabase } from "./AccountRepository";
-import { PgPromiseAdapter } from "./DatabaseConnection";
-import { ExpressAdapter } from "./HttpServer";
-import AccountController from "./AccountController";
 import "dotenv/config";
+import { ExpressAdapter, HapiAdapter, RestifyAdapter } from "./infra/http/HttpServer";
+import { PgPromiseAdapter } from "./infra/database/DatabaseConnection";
+import { AccountRepositoryDatabase } from "./infra/repository/AccountRepository";
+import GetAccount from "./application/use-case/GetAccount";
+import AccountController from "./infra/controller/AccountController";
+import Signup from "./application/use-case/Signup";
+import Registry from "./infra/di/Registry";
 
 async function main() {
   const app = express();
@@ -15,11 +16,17 @@ async function main() {
 
   const httpServer = new ExpressAdapter();
   const connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
-  const accountRepositoryDatabase = new AccountRepositoryDatabase(connection);
-  const signup = new Signup(accountRepositoryDatabase);
-  const getAccount = new GetAccount(accountRepositoryDatabase);
+  const accountRepositoryDatabase = new AccountRepositoryDatabase();
+  const signup = new Signup();
+  const getAccount = new GetAccount();
 
-  new AccountController(httpServer, signup, getAccount);
+  Registry.getInstance().register("httpServer", httpServer)
+  Registry.getInstance().register("databaseConnection", connection)
+  Registry.getInstance().register("accountRepository", accountRepositoryDatabase)
+  Registry.getInstance().register("signup", signup)
+  Registry.getInstance().register("getAccount", getAccount)
+
+  new AccountController();
 
   httpServer.listen(5000);
 }

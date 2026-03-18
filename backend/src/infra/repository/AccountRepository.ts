@@ -1,7 +1,7 @@
-import pgp from "pg-promise";
-import Account from "./Account";
-import Asset from "./Asset";
-import DatabaseConnection from "./DatabaseConnection";
+import Account from "../../domain/Account";
+import DatabaseConnection from "../database/DatabaseConnection";
+import Asset from "../../domain/Asset";
+import { inject } from "../di/Registry";
 
 export default interface AccountRepository {
   saveAccount(account: Account): Promise<void>;
@@ -10,7 +10,8 @@ export default interface AccountRepository {
 }
 
 export class AccountRepositoryDatabase implements AccountRepository {
-  constructor(readonly connection: DatabaseConnection) {}
+  @inject("databaseConnection")
+  connection!: DatabaseConnection;
 
   async saveAccount(account: Account) {
     await this.connection.query(

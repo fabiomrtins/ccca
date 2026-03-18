@@ -1,8 +1,10 @@
-import Account from "./Account";
-import AccountRepository from "./AccountRepository";
+import Account from "../../domain/Account";
+import { inject } from "../../infra/di/Registry";
+import AccountRepository from "../../infra/repository/AccountRepository";
 
 export default class Signup {
-  constructor(readonly accountRepository: AccountRepository) {}
+  @inject("accountRepository")
+  accountRepository!: AccountRepository;
 
   async execute(input: Input): Promise<Output> {
     const account = Account.create(

@@ -1,13 +1,14 @@
 import { beforeEach, expect, test } from "@jest/globals";
 import axios from "axios";
 import sinon from "sinon";
-import Signup from "../src/Signup";
-import GetAccount from "../src/GetAccount";
-import { AccountRepositoryDatabase } from "../src/AccountRepository";
+import "dotenv/config";
 import DatabaseConnection, {
   PgPromiseAdapter,
-} from "../src/DatabaseConnection";
-import 'dotenv/config'
+} from "../src/infra/database/DatabaseConnection";
+import { AccountRepositoryDatabase } from "../src/infra/repository/AccountRepository";
+import Signup from "../src/application/use-case/Signup";
+import GetAccount from "../src/application/use-case/GetAccount";
+import Registry from "../src/infra/di/Registry";
 
 let input: any = null;
 let signup: Signup;
@@ -17,11 +18,12 @@ let connection: DatabaseConnection;
 axios.defaults.validateStatus = () => true;
 
 beforeAll(() => {
-  
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
-  const accountRepository = new AccountRepositoryDatabase(connection);
-  signup = new Signup(accountRepository);
-  getAccount = new GetAccount(accountRepository);
+  const accountRepository = new AccountRepositoryDatabase();
+  Registry.getInstance().register("databaseConnection", connection);
+  Registry.getInstance().register("accountRepository", accountRepository);
+  signup = new Signup();
+  getAccount = new GetAccount();
 });
 
 beforeEach(() => {

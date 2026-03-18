@@ -27,6 +27,10 @@ export default class Account {
       throw new Error("Invalid document");
     }
 
+    if (!document || !validateCpf(document)) {
+      throw new Error("Invalid document");
+    }
+
     if (!validatePassword(password)) {
       throw new Error("Invalid password");
     }

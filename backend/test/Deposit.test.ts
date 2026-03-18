@@ -1,11 +1,14 @@
 import { beforeEach, expect, test } from "@jest/globals";
 import axios from "axios";
-import Signup from "../src/Signup";
-import GetAccount from "../src/GetAccount";
-import Deposit from "../src/Deposit";
-import { AccountRepositoryDatabase } from "../src/AccountRepository";
-import DatabaseConnection, { PgPromiseAdapter } from "../src/DatabaseConnection";
-import 'dotenv/config'
+import "dotenv/config";
+import DatabaseConnection, {
+  PgPromiseAdapter,
+} from "../src/infra/database/DatabaseConnection";
+import { AccountRepositoryDatabase } from "../src/infra/repository/AccountRepository";
+import GetAccount from "../src/application/use-case/GetAccount";
+import Deposit from "../src/application/use-case/Deposit";
+import Signup from "../src/application/use-case/Signup";
+import Registry from "../src/infra/di/Registry";
 
 let input: any = null;
 let signup: Signup;
@@ -16,11 +19,13 @@ axios.defaults.validateStatus = () => true;
 
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
-  const accountDatabaseRepository = new AccountRepositoryDatabase(connection);
-  signup = new Signup(accountDatabaseRepository);
-  getAccount = new GetAccount(accountDatabaseRepository);
-  deposit = new Deposit(accountDatabaseRepository);
-})
+  const accountDatabaseRepository = new AccountRepositoryDatabase();
+  Registry.getInstance().register("databaseConnection", connection)
+  Registry.getInstance().register("accountRepository", accountDatabaseRepository)
+  signup = new Signup();
+  getAccount = new GetAccount();
+  deposit = new Deposit();
+});
 
 beforeEach(() => {
   input = {
@@ -83,5 +88,5 @@ test("Should not make a deposit with invalid quantity", async () => {
 });
 
 afterAll(async () => {
-  await connection.close()
-})
+  await connection.close();
+});

@@ -1,4 +1,4 @@
-import Account from "../src/Account";
+import Account from "../src/domain/Account";
 
 let input: any;
 beforeEach(() => {

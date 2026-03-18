@@ -1,12 +1,15 @@
 import { beforeEach, expect, test } from "@jest/globals";
 import axios from "axios";
-import Signup from "../src/Signup";
-import GetAccount from "../src/GetAccount";
-import Deposit from "../src/Deposit";
-import Withdraw from "../src/Withdraw";
-import { AccountRepositoryDatabase } from "../src/AccountRepository";
-import DatabaseConnection, { PgPromiseAdapter } from "../src/DatabaseConnection";
-import 'dotenv/config'
+import "dotenv/config";
+import DatabaseConnection, {
+  PgPromiseAdapter,
+} from "../src/infra/database/DatabaseConnection";
+import { AccountRepositoryDatabase } from "../src/infra/repository/AccountRepository";
+import GetAccount from "../src/application/use-case/GetAccount";
+import Deposit from "../src/application/use-case/Deposit";
+import Signup from "../src/application/use-case/Signup";
+import Withdraw from "../src/application/use-case/Withdraw";
+import Registry from "../src/infra/di/Registry";
 
 let input: any = null;
 let signup: Signup;
@@ -19,15 +22,16 @@ axios.defaults.validateStatus = () => true;
 
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
-  const accountRepositoryDatabase = new AccountRepositoryDatabase(connection);
-  signup = new Signup(accountRepositoryDatabase);
-  getAccount = new GetAccount(accountRepositoryDatabase);
-  deposit = new Deposit(accountRepositoryDatabase);
-  withdraw = new Withdraw(accountRepositoryDatabase);
-})
+  const accountRepositoryDatabase = new AccountRepositoryDatabase();
+  Registry.getInstance().register("databaseConnection", connection);
+  Registry.getInstance().register("accountRepository", accountRepositoryDatabase);
+  signup = new Signup();
+  getAccount = new GetAccount();
+  deposit = new Deposit();
+  withdraw = new Withdraw();
+});
 
 beforeEach(() => {
-
   input = {
     name: "Alice Ferreira",
     email: "alice.ferreira@example.com",
