@@ -10,11 +10,11 @@ export default class GetAccount {
     const account = await this.accountRepository.getAccountById(accountId);
 
     const output = {
-      accountId: account.accountId,
-      name: account.name,
-      email: account.email,
-      document: account.document,
-      password: account.password,
+      accountId: account.getAccountId(),
+      name: account.getName(),
+      email: account.getEmail(),
+      document: account.getDocument(),
+      password: account.getPassword(),
       assets: account.assets.map((asset: Asset) => ({
         assetId: asset.assetId,
         quantity: asset.quantity,

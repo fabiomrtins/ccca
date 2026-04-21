@@ -17,11 +17,11 @@ export class AccountRepositoryDatabase implements AccountRepository {
     await this.connection.query(
       `INSERT INTO ccca.account (account_id, name, email, document, password) VALUES ($1, $2, $3, $4, $5)`,
       [
-        account.accountId,
-        account.name,
-        account.email,
-        account.document,
-        account.password,
+        account.getAccountId(),
+        account.getName(),
+        account.getEmail(),
+        account.getDocument(),
+        account.getPassword(),
       ]
     );
   }
@@ -40,7 +40,7 @@ export class AccountRepositoryDatabase implements AccountRepository {
     const assets: Asset[] = [];
 
     for (const asset of accountAssets) {
-      assets.push(new Asset(asset.asset_id, parseFloat(asset.quantity)));
+      assets.push(new Asset(asset.asset_id, parseFloat(asset.quantity), parseFloat(asset.blocked_quantity)));
     }
 
     const account = new Account(
@@ -58,13 +58,13 @@ export class AccountRepositoryDatabase implements AccountRepository {
   async updateAccount(account: Account) {
     await this.connection.query(
       `DELETE FROM ccca.account_asset WHERE account_id = $1`,
-      [account.accountId]
+      [account.getAccountId()]
     );
 
     for (const asset of account.assets) {
       await this.connection.query(
-        `INSERT INTO ccca.account_asset (account_id, asset_id, quantity) VALUES ($1, $2, $3)`,
-        [account.accountId, asset.assetId, asset.quantity]
+        `INSERT INTO ccca.account_asset (account_id, asset_id, quantity, blocked_quantity) VALUES ($1, $2, $3, $4)`,
+        [account.getAccountId(), asset.assetId, asset.quantity, asset.blockedQuantity]
       );
     }
   }

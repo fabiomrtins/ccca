@@ -1,40 +1,32 @@
 import Asset from "./Asset";
-import { validateCpf } from "./validateCpf";
-import { validateEmail } from "./validateEmail";
-import { validateName } from "./validateName";
-import { validatePassword } from "./validatePassword";
+import { Document } from "./Document";
+import { Email } from "./Email";
+import { Name } from "./Name";
+import { Order } from "./Order";
+import { Password } from "./Password";
+import { UUID } from "./UUID";
 
 export default class Account {
+  private accountId: UUID;
+  private name: Name;
+  private email: Email;
+  private document: Document;
+  private password: Password;
   assets: Asset[];
 
   constructor(
-    readonly accountId: string,
-    readonly name: string,
-    readonly email: string,
-    readonly document: string,
-    readonly password: string,
+    accountId: string,
+    name: string,
+    email: string,
+    document: string,
+    password: string,
     assets: Asset[]
   ) {
-    if (!name || validateName(name)) {
-      throw new Error("Invalid name");
-    }
-
-    if (!email || validateEmail(email)) {
-      throw new Error("Invalid e-mail");
-    }
-
-    if (!document || !validateCpf(document)) {
-      throw new Error("Invalid document");
-    }
-
-    if (!document || !validateCpf(document)) {
-      throw new Error("Invalid document");
-    }
-
-    if (!validatePassword(password)) {
-      throw new Error("Invalid password");
-    }
-
+    this.accountId = new UUID(accountId);
+    this.name = new Name(name);
+    this.email = new Email(email);
+    this.document = new Document(document);
+    this.password = new Password(password);
     this.assets = assets;
   }
 
@@ -44,7 +36,7 @@ export default class Account {
     document: string,
     password: string
   ) {
-    const accountId = crypto.randomUUID();
+    const accountId = UUID.create().getValue()
 
     const assets: Asset[] = [];
     return new Account(accountId, name, email, document, password, assets);
@@ -60,7 +52,7 @@ export default class Account {
     if (asset) {
       asset.quantity += quantity;
     } else {
-      this.assets.push(new Asset(assetId, quantity));
+      this.assets.push(new Asset(assetId, quantity, 0));
     }
   }
 
@@ -90,5 +82,46 @@ export default class Account {
     }
 
     return asset.quantity;
+  }
+
+  public processOrder(order: Order) {
+    let assetId;
+    let quantity;
+
+    if (order.side === "buy") {
+      assetId = order.getPaymentAssetId()
+      quantity = (order.quantity * order.price)
+    } else {
+      assetId = order.getMainAssetId()
+      quantity = order.quantity
+    }
+
+    const asset = this.assets.find((asset) => asset.assetId === assetId);
+
+    if (!asset || asset.quantity < quantity) {
+      throw new Error("Insufficient funds")
+    }
+
+    asset.blockedQuantity += quantity;
+  }
+
+  getAccountId() {
+    return this.accountId.getValue();
+  }
+
+  getName() {
+    return this.name.getValue();
+  }
+
+  getEmail() {
+    return this.email.getValue();
+  }
+
+  getDocument() {
+    return this.document.getValue();
+  }
+
+  getPassword() {
+    return this.password.getValue();
   }
 }

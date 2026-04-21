@@ -1,5 +1,4 @@
 import { beforeEach, expect, test } from "@jest/globals";
-import axios from "axios";
 import sinon from "sinon";
 import "dotenv/config";
 import DatabaseConnection, {
@@ -9,13 +8,13 @@ import { AccountRepositoryDatabase } from "../src/infra/repository/AccountReposi
 import Signup from "../src/application/use-case/Signup";
 import GetAccount from "../src/application/use-case/GetAccount";
 import Registry from "../src/infra/di/Registry";
+import Account from "../src/domain/Account";
 
 let input: any = null;
 let signup: Signup;
 let getAccount: GetAccount;
 let connection: DatabaseConnection;
 
-axios.defaults.validateStatus = () => true;
 
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
@@ -48,7 +47,16 @@ test("Should get data from existing account using a stub", async () => {
     .resolves();
   const getStub = sinon
     .stub(AccountRepositoryDatabase.prototype, "getAccountById")
-    .resolves(input);
+    .callsFake(async (accountId: string) => {
+      return new Account(
+        accountId,
+        input.name,
+        input.email,
+        input.document,
+        input.password,
+        []
+      );
+    });
 
   const signupOutput = await signup.execute(input);
   expect(signupOutput.accountId).toBeDefined();
@@ -92,7 +100,19 @@ test("Should get data from existing account using a spy", async () => {
 test("Should get data from existing account using mock", async () => {
   const mock = sinon.mock(AccountRepositoryDatabase.prototype);
   mock.expects("saveAccount").once().resolves();
-  mock.expects("getAccountById").once().resolves(input);
+  mock
+    .expects("getAccountById")
+    .once()
+    .callsFake(async (accountId: string) => {
+      return new Account(
+        accountId,
+        input.name,
+        input.email,
+        input.document,
+        input.password,
+        []
+      );
+    });
   const signupOutput = await signup.execute(input);
   expect(signupOutput.accountId).toBeDefined();
 

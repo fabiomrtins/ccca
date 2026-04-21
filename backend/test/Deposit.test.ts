@@ -1,5 +1,4 @@
 import { beforeEach, expect, test } from "@jest/globals";
-import axios from "axios";
 import "dotenv/config";
 import DatabaseConnection, {
   PgPromiseAdapter,
@@ -15,7 +14,6 @@ let signup: Signup;
 let deposit: Deposit;
 let getAccount: GetAccount;
 let connection: DatabaseConnection;
-axios.defaults.validateStatus = () => true;
 
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
