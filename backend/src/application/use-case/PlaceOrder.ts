@@ -1,26 +1,25 @@
 import { Order } from "../../domain/Order";
 import { inject } from "../../infra/di/Registry";
-import AccountRepository from "../../infra/repository/AccountRepository";
+import Mediator from "../../infra/mediator/Mediator";
 import OrderRepository from "../../infra/repository/OrderRepository";
+import WalletRepository from "../../infra/repository/WalletRepository";
 
 export default class PlaceOrder {
-    @inject("accountRepository")
-    accountRepository!: AccountRepository
     @inject("orderRepository")
     orderRepository!: OrderRepository;
+    @inject("walletRepository")
+    walletRepository!: WalletRepository
+    @inject("mediator")
+    mediator!: Mediator
 
     async execute(input: Input): Promise<Output> {
-        const account = await this.accountRepository.getAccountById(input.accountId)
-
-        if (!account) {
-            throw new Error("Account not found");
-        }
-
+        const wallet = await this.walletRepository.getWalletByAccountId(input.accountId)
         const order = Order.create(input.accountId, input.marketId, input.price, input.quantity, input.side)
-
-        account.processOrder(order);
+        wallet.processOrder(order);
         await this.orderRepository.saveOrder(order)
-        await this.accountRepository.updateAccount(account)
+        await this.walletRepository.upsertWallet(wallet)
+
+        await this.mediator.notifyAll("orderPlaced", order);
 
         return {
             orderId: order.getOrderId()

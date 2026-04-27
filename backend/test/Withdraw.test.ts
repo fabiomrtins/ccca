@@ -10,6 +10,7 @@ import Deposit from "../src/application/use-case/Deposit";
 import Signup from "../src/application/use-case/Signup";
 import Withdraw from "../src/application/use-case/Withdraw";
 import Registry from "../src/infra/di/Registry";
+import { WalletRepositoryDatabase } from "../src/infra/repository/WalletRepository";
 
 let input: any = null;
 let signup: Signup;
@@ -23,8 +24,10 @@ axios.defaults.validateStatus = () => true;
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
   const accountRepositoryDatabase = new AccountRepositoryDatabase();
+  const walletDatabaseRepository = new WalletRepositoryDatabase();
   Registry.getInstance().register("databaseConnection", connection);
   Registry.getInstance().register("accountRepository", accountRepositoryDatabase);
+  Registry.getInstance().register("walletRepository", walletDatabaseRepository);
   signup = new Signup();
   getAccount = new GetAccount();
   deposit = new Deposit();

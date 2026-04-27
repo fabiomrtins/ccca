@@ -1,11 +1,7 @@
-import { Order } from "../../domain/Order";
 import { inject } from "../../infra/di/Registry";
-import AccountRepository from "../../infra/repository/AccountRepository";
 import OrderRepository from "../../infra/repository/OrderRepository";
 
 export default class GetOrder {
-    @inject("accountRepository")
-    accountRepository!: AccountRepository
     @inject("orderRepository")
     orderRepository!: OrderRepository;
 
@@ -25,6 +21,8 @@ export default class GetOrder {
             status: order.getStatus(),
             quantity: order.getQuantity(),
             timestamp: order.getTimestamp(),
+            fillQuantity: order.getFillQuantity(),
+            fillPrice: order.getFillPrice(),
         }
 
         return output
@@ -44,4 +42,6 @@ type Output = {
     status: string;
     quantity: number;
     timestamp: Date;
+    fillQuantity: number;
+    fillPrice: number;
 }

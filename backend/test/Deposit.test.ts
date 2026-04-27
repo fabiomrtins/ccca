@@ -8,6 +8,7 @@ import GetAccount from "../src/application/use-case/GetAccount";
 import Deposit from "../src/application/use-case/Deposit";
 import Signup from "../src/application/use-case/Signup";
 import Registry from "../src/infra/di/Registry";
+import { WalletRepositoryDatabase } from "../src/infra/repository/WalletRepository";
 
 let input: any = null;
 let signup: Signup;
@@ -18,8 +19,10 @@ let connection: DatabaseConnection;
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
   const accountDatabaseRepository = new AccountRepositoryDatabase();
+  const walletDatabaseRepository = new WalletRepositoryDatabase();
   Registry.getInstance().register("databaseConnection", connection)
   Registry.getInstance().register("accountRepository", accountDatabaseRepository)
+  Registry.getInstance().register("walletRepository", walletDatabaseRepository)
   signup = new Signup();
   getAccount = new GetAccount();
   deposit = new Deposit();

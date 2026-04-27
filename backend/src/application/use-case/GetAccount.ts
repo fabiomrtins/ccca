@@ -1,13 +1,17 @@
 import AccountRepository from "../../infra/repository/AccountRepository";
 import Asset from "../../domain/Asset";
 import { inject } from "../../infra/di/Registry";
+import WalletRepository from "../../infra/repository/WalletRepository";
 
 export default class GetAccount {
   @inject("accountRepository")
   accountRepository!: AccountRepository;
+  @inject("walletRepository")
+  walletRepository!: WalletRepository
 
   async execute(accountId: string): Promise<Output> {
     const account = await this.accountRepository.getAccountById(accountId);
+    const wallet = await this.walletRepository.getWalletByAccountId(accountId);
 
     const output = {
       accountId: account.getAccountId(),
@@ -15,7 +19,7 @@ export default class GetAccount {
       email: account.getEmail(),
       document: account.getDocument(),
       password: account.getPassword(),
-      assets: account.assets.map((asset: Asset) => ({
+      assets: wallet.getAssets().map((asset: Asset) => ({
         assetId: asset.assetId,
         quantity: asset.quantity,
       })),

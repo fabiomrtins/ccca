@@ -9,18 +9,21 @@ import Signup from "../src/application/use-case/Signup";
 import GetAccount from "../src/application/use-case/GetAccount";
 import Registry from "../src/infra/di/Registry";
 import Account from "../src/domain/Account";
+import { WalletRepositoryDatabase } from "../src/infra/repository/WalletRepository";
+import Wallet from "../src/domain/Wallet";
 
 let input: any = null;
 let signup: Signup;
 let getAccount: GetAccount;
 let connection: DatabaseConnection;
 
-
 beforeAll(() => {
   connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
   const accountRepository = new AccountRepositoryDatabase();
+  const walletRepository = new WalletRepositoryDatabase();
   Registry.getInstance().register("databaseConnection", connection);
   Registry.getInstance().register("accountRepository", accountRepository);
+  Registry.getInstance().register("walletRepository", walletRepository);
   signup = new Signup();
   getAccount = new GetAccount();
 });
@@ -53,9 +56,13 @@ test("Should get data from existing account using a stub", async () => {
         input.name,
         input.email,
         input.document,
-        input.password,
-        []
+        input.password
       );
+    });
+  const getWalletStub = sinon
+    .stub(WalletRepositoryDatabase.prototype, "getWalletByAccountId")
+    .callsFake(async (accountId: string) => {
+      return new Wallet(accountId, []);
     });
 
   const signupOutput = await signup.execute(input);
@@ -70,7 +77,9 @@ test("Should get data from existing account using a stub", async () => {
 
   saveStub.restore();
   getStub.restore();
+  getWalletStub.restore();
 });
+
 
 test("Should get data from existing account using a spy", async () => {
   const saveSpy = sinon.spy(AccountRepositoryDatabase.prototype, "saveAccount");
@@ -97,6 +106,7 @@ test("Should get data from existing account using a spy", async () => {
   getSpy.restore();
 });
 
+
 test("Should get data from existing account using mock", async () => {
   const mock = sinon.mock(AccountRepositoryDatabase.prototype);
   mock.expects("saveAccount").once().resolves();
@@ -109,10 +119,14 @@ test("Should get data from existing account using mock", async () => {
         input.name,
         input.email,
         input.document,
-        input.password,
-        []
+        input.password
       );
     });
+  const getWalletMock = sinon
+    .mock(WalletRepositoryDatabase.prototype);
+  getWalletMock.expects("getWalletByAccountId").once().callsFake(async (accountId: string) => {
+    return new Wallet(accountId, []);
+  });
   const signupOutput = await signup.execute(input);
   expect(signupOutput.accountId).toBeDefined();
 
@@ -126,6 +140,7 @@ test("Should get data from existing account using mock", async () => {
   mock.verify();
   mock.restore();
 });
+
 
 afterAll(async () => {
   await connection.close();

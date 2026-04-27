@@ -8,17 +8,20 @@ import GetAccount from "./application/use-case/GetAccount";
 import AccountController from "./infra/controller/AccountController";
 import Signup from "./application/use-case/Signup";
 import Registry from "./infra/di/Registry";
+import { WalletRepositoryDatabase } from "./infra/repository/WalletRepository";
 
 async function main() {
   const httpServer = new ExpressAdapter();
   const connection = new PgPromiseAdapter(process.env.PG_CONNECTION_URL || "");
   const accountRepositoryDatabase = new AccountRepositoryDatabase();
+  const walletRepositoryDatabase = new WalletRepositoryDatabase();
   const signup = new Signup();
   const getAccount = new GetAccount();
 
   Registry.getInstance().register("httpServer", httpServer)
   Registry.getInstance().register("databaseConnection", connection)
   Registry.getInstance().register("accountRepository", accountRepositoryDatabase)
+  Registry.getInstance().register("walletRepository", walletRepositoryDatabase)
   Registry.getInstance().register("signup", signup)
   Registry.getInstance().register("getAccount", getAccount)
 
